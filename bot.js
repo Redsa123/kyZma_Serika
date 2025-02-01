@@ -1,6 +1,7 @@
 const fs = require("fs"); // The file system module
 const TelegramBot = require("node-telegram-bot-api");
 const config = require("./config");
+const adminFunctions = require("./adminFunctions");
 
 //? Read data from a JSON file
 function readDataFromJson(filePath) {
@@ -24,7 +25,9 @@ function writeDataToJson(filePath, data) {
     }
 }
 
+// Read essential data from JSON files
 const users = readDataFromJson("./data/users.json");
+const admins = readDataFromJson("./data/admins.json");
 
 // Create a bot instance
 const bot = new TelegramBot(config.botToken, { polling: true });
@@ -32,7 +35,7 @@ const bot = new TelegramBot(config.botToken, { polling: true });
 //! Handle the /start command and add the user to the Users array
 bot.on("message", (msg) => {
     if (msg.text === "/start") {
-        bot.sendMessage(msg.chat.id, "Hello! I'm your Telegram bot.");
+        bot.sendMessage(msg.chat.id, "Hello! I'm kyZma.");
 
         // Add the user to the usres.json file
         if (
@@ -76,10 +79,37 @@ bot.on("message", (msg) => {
         bot.sendMessage(msg.chat.id, `Your name is: ${senderUserName}`);
     }
 
-    //! Users command
+    //!Admin commands
+
     if (msg.text === "/users") {
-        const usersList = users.join(", ");
-        bot.sendMessage(msg.chat.id, `Users: ${usersList}`);
+        adminFunctions.allUsersList(admins, bot, msg, users);
+    }
+
+    if (msg.text === "/admins") {
+        adminFunctions.allAdminsList(admins, bot, msg, users);
+    }
+
+    if (msg.text.split(" ")[0] == "/addAdmin") {
+        adminFunctions.addAdmin(admins, bot, msg, users);
+    }
+
+    //! Onopiienko_style commands
+    if (msg.text.split(" ")[0] === "/removeAdmin") {
+        if (msg.from.username === "onopriienko_style") {
+            const username = msg.text.split(" ")[1];
+            if (admins.includes(username)) {
+                admins.splice(admins.indexOf(username), 1);
+                writeDataToJson("./data/admins.json", admins);
+                bot.sendMessage(
+                    msg.chat.id,
+                    `User ${username} is no longer an admin.`
+                );
+            } else {
+                bot.sendMessage(msg.chat.id, "This user is not an admin.");
+            }
+        } else {
+            bot.sendMessage(msg.chat.id, "You cannot access this command.");
+        }
     }
 });
 
