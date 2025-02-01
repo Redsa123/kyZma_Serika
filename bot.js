@@ -79,6 +79,23 @@ bot.on("message", (msg) => {
         bot.sendMessage(msg.chat.id, `Your name is: ${senderUserName}`);
     }
 
+    //? Help Command
+    if (msg.text === "/help") {
+        const helpMessage = `
+        Available commands:
+/start - Start the bot
+/time - Get the current time
+/myUsername - Get your username
+/users - List all users (admin only)
+/admins - List all admins (admin only)
+/addAdmin <username> - Add a new admin (admin only)
+/removeAdmin <username> - Remove an admin (onopriienko_style only)`;
+
+        bot.sendMessage(msg.chat.id, helpMessage);
+    }
+
+    //? Persistent menu command
+
     //!Admin commands
 
     if (msg.text === "/users") {
@@ -112,5 +129,15 @@ bot.on("message", (msg) => {
         }
     }
 });
+
+//! Set bot menu
+bot.setChatMenuButton({ menu_button: { type: "commands" } });
+const commands = [
+    { command: "start", description: "Start the bot" },
+    { command: "help", description: "Get help" },
+    { command: "time", description: "Get your local time" },
+    { command: "myUsername", description: "Get your username" },
+];
+bot.setMyCommands(commands);
 
 console.log("Bot is running...");
